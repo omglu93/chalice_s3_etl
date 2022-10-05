@@ -35,7 +35,7 @@ def _load_file(path: str) -> pd.DataFrame:
     return pd.read_excel(path)
 
 
-def calculate_levenshtein_ratio(base_str: str, target_str) -> float:
+def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
     # Create matrix
     rows = len(base_str) + 1
     cols = len(target_str) + 1
