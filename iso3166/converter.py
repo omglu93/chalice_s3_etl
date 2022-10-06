@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from utils import calculate_levenshtein_ratio
+from utils import calculate_levenshtein_ratio, timeit
 
 DATA_PATH = os.path.join(os.path.split(os.path.abspath(__file__))[0],
                          "country_name.csv")
@@ -31,6 +31,7 @@ def country_name_conversion(df: pd.DataFrame,
     df["country_name_helper"] = df[secondary_column].apply(
         _format_country_name, args=("alpha-2", fuzzy_threshold, "official"))
 
+    # This adds only a small amount of overhead
     df["country_name_final"] = df["country_name"].combine_first(df.country_name_helper)
     df["country_code_final"] = df["country_code"].combine_first(df.country_code_helper)
 

@@ -1,4 +1,5 @@
 import os
+import time
 
 import pandas as pd
 import numpy as np
@@ -97,6 +98,19 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
 
     return ((len(base_str)+len(target_str)) - zero_matrix[row][col]) / (len(base_str)+len(target_str))
 
+
+def timeit(func):
+    """
+    Decorator for measuring function's running time.
+    """
+    def measure_time(*args, **kw):
+        start_time = time.time()
+        result = func(*args, **kw)
+        print("Processing time of %s(): %.2f seconds."
+              % (func.__qualname__, time.time() - start_time))
+        return result
+
+    return measure_time
 
 if __name__ == "__main__":
     x = read_data(r"/Users/omargluhic/PycharmProjects/dataeng_task/test/test_data/folder_test")
