@@ -42,7 +42,7 @@ def _read_data(path: str,
         print("")
         return (format_function[os.path.join(path, f)](os.path.join(path, f)) for f in os.listdir(path))
 
-    return format_function[path](path)
+    yield format_function[path](path)
 
 
 def _find_file_function(path: str) -> Callable:
