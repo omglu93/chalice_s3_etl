@@ -2,18 +2,21 @@ import os
 import pandas as pd
 import numpy as np
 
+from typing import Generator
+from error.exceptions import FileLoadingError
 
-def read_data(path: str) -> pd.DataFrame:
-    """
-    TODO Make this a generator
-    """
-    # Check if the path is a folder
-    if os.path.isdir(path) is True:
 
-        for file in os.listdir(path):
-            pass
+def read_data(path: str) -> Generator:
 
-    return _load_file(path)
+    try:
+        # Check if the path is a folder
+        if os.path.isdir(path) is True:
+            for file in os.listdir(path):
+                yield _load_file(os.path.join(path, file))
+        yield _load_file(path)
+
+    except Exception as error:
+        FileLoadingError(str(error), message="Error loading files")
 
 
 def _load_file(path: str) -> pd.DataFrame:
@@ -23,10 +26,10 @@ def _load_file(path: str) -> pd.DataFrame:
     file_functions = {".csv": pd.read_csv}
 
     # Find file type
-    _, file_type = os.path.split(path)
+    _, file_type = os.path.splitext(path)
 
     if file_type is None:
-        pass  # raise error and log it
+        raise FileLoadingError("File format not found")
 
     elif file_type in file_functions:
         return file_functions[file_type](path)
@@ -65,5 +68,8 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
 
 
 if __name__ == "__main__":
+    BASE_PATH = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+    LOG_PATH = f"{BASE_PATH}/log/base_loger.log"
     x = calculate_levenshtein_ratio("canada", "cnada")
     print(x)
+    print(LOG_PATH)

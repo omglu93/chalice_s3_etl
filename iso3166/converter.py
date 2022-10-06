@@ -95,7 +95,8 @@ if __name__ == "__main__":
                 " ireland ",
                 "this is not a country dude",
                 "bosnia and hercegovina",
-                "United Kingdom of Great Britain and Northern Ireland"],
+                "United Kingdom of Great Britain and Northern Ireland",
+            "The Federal Republic of Germany"],
 
             "mess_codes": [
                 "CA",
@@ -105,7 +106,8 @@ if __name__ == "__main__":
                 "IEE",
                 "BA",
                 "BA",
-                "GBB"
+                "GBB",
+                "DA"
             ]
         })
 
