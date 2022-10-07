@@ -3,7 +3,7 @@ import time
 
 import pandas as pd
 import numpy as np
-from functools import lru_cache, wraps
+from functools import lru_cache
 
 from typing import Generator, Callable, Dict
 from error.exceptions import FileLoadingError
@@ -71,6 +71,7 @@ def _find_file_function(path: str) -> Callable:
         raise
 
 
+@lru_cache(maxsize=None)
 def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
     # Create matrix
     rows = len(base_str) + 1
