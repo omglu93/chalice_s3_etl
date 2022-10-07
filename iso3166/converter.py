@@ -1,7 +1,8 @@
 import os
 import pandas as pd
+import numpy as np
 
-from iso3166.utils import calculate_levenshtein_ratio
+from iso3166.utils import calculate_levenshtein_ratio, timeit
 from error.exceptions import DistanceCalculationError, AutoDetectionError
 
 DATA_PATH = os.path.join(os.path.split(os.path.abspath(__file__))[0],
@@ -18,17 +19,25 @@ def country_name_conversion(df: pd.DataFrame,
     target_column = None
     secondary_column = None
     ini_num_col = len(df.columns)
-
+    option = None # Temp fix
     for i in range(auto_find_retry):
-        target_column = _auto_find_column(df, "official", sample_size)
-        if target_column is not None:
-            break
+        for option in ("name", "official"):
+            target_column = _auto_find_column(df, option, sample_size)
+            if target_column is not None:
+                break
     try:
+
         df["country_name"] = df[target_column].apply(
             _format_country_name,
-            args=("official", fuzzy_threshold, "official"))
+            args=(DATA[option].str.lower()
+                  .str.replace(" ", "").values,
+                  fuzzy_threshold, "official"))
+
         df["country_code"] = df[target_column].apply(
-            _format_country_name, args=("official", fuzzy_threshold, "alpha-2"))
+            _format_country_name,
+            args=(DATA[option].str.lower()
+                  .str.replace(" ", "").values,
+                  fuzzy_threshold, "alpha-2"))
 
     except KeyError as err:
         AutoDetectionError(err=err, message="Program cannot autodetect columns")
@@ -40,9 +49,16 @@ def country_name_conversion(df: pd.DataFrame,
                 break
 
         df["country_code_helper"] = df[secondary_column].apply(
-            _format_country_name, args=("alpha-2", fuzzy_threshold, "alpha-2"))
+            _format_country_name,
+            args=(DATA["alpha-2"].str.lower()
+                  .str.replace(" ", "").values,
+                  fuzzy_threshold, "alpha-2"))
+
         df["country_name_helper"] = df[secondary_column].apply(
-            _format_country_name, args=("alpha-2", fuzzy_threshold, "official"))
+            _format_country_name,
+            args=(DATA["alpha-2"].str.lower()
+                  .str.replace(" ", "").values,
+                  fuzzy_threshold, "official"))
 
     except KeyError as err:
         AutoDetectionError(err=err, message="Program cannot autodetect columns")
@@ -83,15 +99,14 @@ def _auto_find_column(df: pd.DataFrame, input_format: str,
                 return col
 
 
-def _format_country_name(val: str, input_format: str, fuzzy_threshold: int,
+def _format_country_name(val: str,
+                         target_column: pd.Series,
+                         fuzzy_threshold: int,
                          wanted_output: str):
     country = str(val).replace(" ", "").lower()
 
-    target_column = DATA[input_format].str.lower()
-    target_column = target_column.str.replace(" ", "")
-
-    if country in target_column.values:
-        value_index = target_column[target_column == country].index[0]
+    if country in target_column:
+        value_index = np.where(target_column == country)[0][0]
         return DATA[wanted_output][value_index]
 
     country_index = _find_best_distance(country, target_column, fuzzy_threshold)
@@ -168,8 +183,12 @@ if __name__ == "__main__":
     # y = _find_best_distance("Canadda", "name", 80)
     # z = _format_country_name("Cannnada", "name", 95)
     # g = country_name_conversion(test_df, fuzzy_threshold=80)
-    # x = country_name_conversion(test_df)
-    # print(x)
-    import json
-    x = DATA.to_dict("index")
-    print(x)
+    @timeit
+    def timer():
+
+        x = pd.read_csv(r"/Users/omargluhic/PycharmProjects/dataeng_task/test/test_data/population_by_country_2020.csv")
+
+        y = country_name_conversion(x, fuzzy_threshold=90)
+
+        print(y)
+    timer()
