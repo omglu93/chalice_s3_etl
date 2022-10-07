@@ -1,9 +1,9 @@
 from .logger import logging
 
 
-class FileLoadingError(Exception):
+class BaseCustomException(Exception):
 
-    def __init__(self, err, message=""):
+    def __init__(self, err=None, message=""):
         self.message = message
         self.err = err
         super().__init__(self.message)
@@ -12,3 +12,16 @@ class FileLoadingError(Exception):
 
     def __str__(self):
         return self.message
+
+
+class FileLoadingError(BaseCustomException):
+    pass
+
+
+class DistanceCalculationError(BaseCustomException):
+    pass
+
+
+class AutoDetectionError(BaseCustomException):
+    pass
+
