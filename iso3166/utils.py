@@ -142,8 +142,10 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
         Returns a float representing ratio of the match.
     """
     # Create matrix
+
     rows = len(base_str) + 1
     cols = len(target_str) + 1
+
     row = None
     col = None
 

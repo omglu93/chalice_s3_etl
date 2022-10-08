@@ -9,7 +9,7 @@ from error.exceptions import DistanceCalculationError, AutoDetectionError
 # standard naming options for the iso3166 naming standard
 DATA_PATH = os.path.join(os.path.split(os.path.abspath(__file__))[0],
                          "country_name.csv")
-DATA = pd.read_csv(DATA_PATH, dtype=str)
+DATA = pd.read_csv(DATA_PATH, dtype=str, keep_default_na=False)
 
 
 def country_name_conversion(df: pd.DataFrame,
@@ -245,7 +245,6 @@ def _find_best_distance(country: str, target_column: pd.Series,
                 results.append((match_ratio, i))
 
         except Exception as err:
-
             DistanceCalculationError(err=err,
                                      message="Error calculating distance"
                                              f"for:{val} on index {i}")
