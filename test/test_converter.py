@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+import numpy as np
 
 from iso3166.converter import country_name_conversion
 from error.exceptions import AutoDetectionError
@@ -39,3 +40,46 @@ def test_country_name_conversion_two_column_names():
     return_dataframe = country_name_conversion(test_df)
 
     assert type(return_dataframe) == pd.DataFrame
+
+
+def test_country_name_conversion_empty_df():
+
+    test_df = pd.DataFrame(
+        {"messy_country": [],
+         "messy_code": []})
+
+    with pytest.raises(AutoDetectionError) as e_info:
+        country_name_conversion(test_df)
+
+
+def test_country_name_conversion_none_types():
+
+    test_df = pd.DataFrame(
+        {"messy_country": [np.nan],
+         "messy_code": [np.nan]})
+
+    with pytest.raises(AutoDetectionError) as e_info:
+        country_name_conversion(test_df)
+
+
+def test_country_name_conversion_none_types_in_data():
+    test_df = pd.DataFrame(
+        {"messy_country": [np.nan, "Canada"],
+         "messy_code": ["CA", np.nan]})
+
+    df = country_name_conversion(test_df)
+
+    assert df["country_name_final"][0] == "Canada"
+    assert df["country_name_final"][1] == "Canada"
+    assert df["country_code_final"][0] == "CA"
+    assert df["country_code_final"][1] == "CA"
+
+
+def test_country_name_conversion_wrong_data_type():
+    test_df = pd.DataFrame(
+        {"messy_country": [np.nan, 1],
+         "messy_code": ["CA", 2]})
+
+    df = country_name_conversion(test_df)
+    assert df
+

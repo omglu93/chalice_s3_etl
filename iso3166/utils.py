@@ -1,5 +1,6 @@
 import os
 import time
+import random
 
 import pandas as pd
 import numpy as np
@@ -41,6 +42,7 @@ def read_data(path: str) -> Generator:
                 read_function = _find_file_function(file_path)
 
                 all_read_functions[file_path] = read_function
+
             return _read_data(path, all_read_functions)
 
         # If a file path is given, only finds the function for that one file
@@ -60,8 +62,6 @@ def _read_data(path: str,
     Takes in a path and the function directory to create a generator for the
     file or folder.
 
-    Note - the function and generator had to be separated as generator don't
-    support raising of exceptions.
 
     Parameters
     ----------
@@ -79,8 +79,9 @@ def _read_data(path: str,
         # Creates a generator for each file in the folder
         return (format_function[os.path.join(path, f)]
                 (os.path.join(path, f)) for f in os.listdir(path))
-
-    yield format_function[path](path)
+    else:
+        # Quick fix
+        return (format_function[path](path) for x in range(0, 1))
 
 
 def _find_file_function(path: str) -> Callable:
@@ -172,6 +173,37 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
 
     return ((len(base_str)+len(target_str))
             - zero_matrix[row][col]) / (len(base_str)+len(target_str))
+
+
+def export_to_parquet(path: str, dataframe: pd.DataFrame) -> None:
+
+    """
+    Function writes out a pandas dataframe to parquet format based on the path
+    given. If it is a folder, the function creates a new name for the file.
+    Otherwise, the file path is used to generate the name.
+
+    :param path:
+        Path that is used to create the parquet file. It can be either a folder
+        or file path.
+    :param dataframe:
+        Cleaned dataframe that will be writen in file.
+    :return None:
+        Returns nothing
+    """
+
+    # Check if folder
+    if os.path.isdir(path):
+
+        # Create current timestamp and name
+        time_string = time.strftime("%Y%m%d-%H%M%S")
+        new_name = "file_export"
+        random_id = random.randint(1000, 9999)
+        full_path = os.path.join(path, f"{new_name}-{time_string}-{random_id}")
+
+        dataframe.to_parquet(full_path)
+
+    else:
+        dataframe.to_parquet(path)
 
 
 def timeit(func):

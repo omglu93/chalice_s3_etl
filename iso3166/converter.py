@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 
-from iso3166.utils import calculate_levenshtein_ratio, timeit
+from iso3166.utils import calculate_levenshtein_ratio
 from error.exceptions import DistanceCalculationError, AutoDetectionError
 
 # Loads the csv file containing possible naming options and
@@ -14,7 +14,7 @@ DATA = pd.read_csv(DATA_PATH, dtype=str, keep_default_na=False)
 
 def country_name_conversion(df: pd.DataFrame,
                             *,
-                            fuzzy_threshold: int = 55,
+                            fuzzy_threshold: int = 70,
                             sample_size: int = 10,
                             auto_find_retry: int = 3) -> pd.DataFrame:
     """
@@ -57,7 +57,7 @@ def country_name_conversion(df: pd.DataFrame,
     for i in range(auto_find_retry):
 
         # First tries to match on the normal column, then the official
-        for option in ("name", "official"):
+        for option in ("official", "name"):
             target_column = _auto_find_column(df, option, sample_size)
             if target_column is not None:
                 # if the column in found the loop breaks
@@ -253,57 +253,3 @@ def _find_best_distance(country: str, target_column: pd.Series,
         """TODO Reporting tool without raising anything"""
         return None
     return max(results)[1]
-
-
-if __name__ == "__main__":
-    test_df = pd.DataFrame(
-        {
-            "messy_country": [
-                "Canada",
-                "foo canada bar",
-                "cnada",
-                "northern ireland",
-                " ireland ",
-                "this is not a country dude",
-                "bosnia and hercegovina",
-                "United Kingdom of Great Britain and Northern Ireland",
-                "The Federal Republic of Germany"],
-
-            "mess_codes": [
-                "CA",
-                "ca",
-                "ca",
-                "GB",
-                "IEE",
-                "BA",
-                "BA",
-                "GBB",
-                "DA"
-            ],
-
-            "numbers": [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9
-            ]
-        })
-
-    # x = _auto_find_column(test_df, "name", 5)
-    # y = _find_best_distance("Canadda", "name", 80)
-    # z = _format_country_name("Cannnada", "name", 95)
-    # g = country_name_conversion(test_df, fuzzy_threshold=80)
-    @timeit
-    def timer():
-
-        x = pd.read_csv(r"/Users/omargluhic/PycharmProjects/dataeng_task/test/test_data/population_by_country_2020.csv")
-
-        y = country_name_conversion(x, fuzzy_threshold=90)
-
-        print(y)
-    timer()
