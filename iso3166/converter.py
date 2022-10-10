@@ -1,4 +1,6 @@
 import os
+from typing import Tuple
+
 import pandas as pd
 import numpy as np
 
@@ -16,7 +18,8 @@ def country_name_conversion(df: pd.DataFrame,
                             *,
                             fuzzy_threshold: int = 70,
                             sample_size: int = 10,
-                            auto_find_retry: int = 3) -> pd.DataFrame:
+                            auto_find_retry: int = 3,
+                            fast_mode: bool = True) -> pd.DataFrame:
     """
     Function cleans and standardizes country names based on the
     iso3166 standard. The output contains the dataframe used as input in
@@ -26,7 +29,6 @@ def country_name_conversion(df: pd.DataFrame,
 
     Parameters
     ----------
-
     :param df:
         A pandas dataframe that contains the data that needs to be cleaned.
     :param fuzzy_threshold:
@@ -39,6 +41,12 @@ def country_name_conversion(df: pd.DataFrame,
     :param auto_find_retry:
         The number of reties that the function will do for the auto-detection
         of columns
+    :param fast_mode:
+        Boolean value that determines the mode of the application.
+            - True - Fast mode only finds one column for the country name
+                    and leaves it at that.
+            - False - Loops over both the official and unofficial naming
+                    before returning results.
     :return pd.Dataframe:
         Returns a cleaned dataframe with iso3166 columns for the country code
         and the country name
@@ -65,17 +73,26 @@ def country_name_conversion(df: pd.DataFrame,
 
     # Starts the creation of the helper columns
     try:
+
+        data_column = (DATA[option].str.lower().str.replace(" ", "").values,)
+
+        if not fast_mode:
+            # Get columns not chosen
+            other = DATA[[x for x in ("official", "name") if x != option][0]] \
+                .str.lower().str.replace(" ", "").values
+            # Pack both of the Series up
+            data_column = (data_column[0],
+                           other)
+
         df["country_name"] = df[target_column].apply(
             _format_country_name,
-            args=(DATA[option].str.lower()
-                  .str.replace(" ", "").values,
-                  fuzzy_threshold, "official"))
+            args=(data_column,
+                  fuzzy_threshold, "official", fast_mode))
 
         df["country_code"] = df[target_column].apply(
             _format_country_name,
-            args=(DATA[option].str.lower()
-                  .str.replace(" ", "").values,
-                  fuzzy_threshold, "alpha-2"))
+            args=(data_column,
+                  fuzzy_threshold, "alpha-2", fast_mode))
 
     # Catch in case the auto-column finder returns nothing
     except KeyError as err:
@@ -89,16 +106,16 @@ def country_name_conversion(df: pd.DataFrame,
             if secondary_column is not None:
                 break
 
+        sec_data_col = DATA["alpha-2"].str.lower().str.replace(" ", "").values,
+
         df["country_code_helper"] = df[secondary_column].apply(
             _format_country_name,
-            args=(DATA["alpha-2"].str.lower()
-                  .str.replace(" ", "").values,
+            args=(sec_data_col,
                   fuzzy_threshold, "alpha-2"))
 
         df["country_name_helper"] = df[secondary_column].apply(
             _format_country_name,
-            args=(DATA["alpha-2"].str.lower()
-                  .str.replace(" ", "").values,
+            args=(sec_data_col,
                   fuzzy_threshold, "official"))
 
     # Catch in case the auto-column finder returns nothing
@@ -125,6 +142,11 @@ def country_name_conversion(df: pd.DataFrame,
     df.drop(df.columns[[col for col in range(ini_num_col, final_num_col)]],
             axis=1,
             inplace=True)
+    # Convert type to string to prevent some parquet errors
+    conversion_list = df.columns[[col for col in range(ini_num_col,
+                                                       len(df.columns))]]
+
+    df[conversion_list] = df[conversion_list].astype(str)
 
     return df
 
@@ -173,10 +195,10 @@ def _auto_find_column(df: pd.DataFrame,
 
 
 def _format_country_name(val: str,
-                         target_column: pd.Series,
+                         target_column: tuple[pd.Series],
                          fuzzy_threshold: int,
-                         wanted_output: str) -> str | None:
-
+                         wanted_output: str,
+                         fast_mode: bool = True) -> str | None:
     """
     Function re-formats/standardizes the country name.
 
@@ -200,12 +222,34 @@ def _format_country_name(val: str,
     country = str(val).replace(" ", "").lower()
 
     # Quick return, if the countries name matches completely
-    if country in target_column:
-        value_index = np.where(target_column == country)[0][0]
-        return DATA[wanted_output][value_index]
+    for data in target_column:
+        if country in data[0]:
+            value_index = np.where(data[0] == country)[0]
+            return DATA[wanted_output][value_index]
 
     # Calculates the levenshtein ratio and returns index of best value
-    country_index = _find_best_distance(country, target_column, fuzzy_threshold)
+    if not fast_mode:
+
+        results = []
+        for data in target_column:
+            country_ratio = _find_best_distance(country, data,
+                                                fuzzy_threshold,
+                                                ratio=True)
+            results.append(country_ratio)
+
+        # Finds the maximum value within a tuple
+        max_ratio = 0
+        country_index = None
+        for match_ratio in results:
+
+            if not match_ratio:
+                continue
+            if match_ratio[0] > max_ratio:
+                max_ratio, country_index = match_ratio
+
+    else:
+        country_index = _find_best_distance(country,
+                                            target_column[0], fuzzy_threshold)
 
     if country_index is None:
         return None
@@ -214,8 +258,8 @@ def _format_country_name(val: str,
 
 
 def _find_best_distance(country: str, target_column: pd.Series,
-                        fuzzy_threshold: int) -> int | None:
-
+                        fuzzy_threshold: int,
+                        ratio: bool = False) -> None | tuple[float, int] | int:
     """
     Function finds the maximum levenshtein ratio and returns the index of that
     value.
@@ -252,4 +296,8 @@ def _find_best_distance(country: str, target_column: pd.Series,
     if not results:
         """TODO Reporting tool without raising anything"""
         return None
+
+    if ratio:
+        return max(results)
+
     return max(results)[1]

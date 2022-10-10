@@ -38,12 +38,11 @@ def name_standardization_factory(input_file_location: str,
 
     for dataset in data_generator:
         # Process the data
-        dataframe = iso3166.country_name_conversion(
-            df=dataset,
-            fuzzy_threshold=fuzzy_threshold,
-            sample_size=sample_size,
-            auto_find_retry=auto_find_retry
-        )
+        dataframe = iso3166.country_name_conversion(df=dataset,
+                                                    fuzzy_threshold=fuzzy_threshold,
+                                                    sample_size=sample_size,
+                                                    auto_find_retry=auto_find_retry,
+                                                    fast_mode=False)
         # Write the data
         iso3166.export_to_parquet(output_location, dataframe)
 

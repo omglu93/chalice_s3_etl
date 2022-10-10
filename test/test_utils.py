@@ -63,7 +63,7 @@ def test_levenshtein_calculation_close_match():
 
     x = calculate_levenshtein_ratio(base, target)
 
-    assert x >= 0.9
+    assert x >= 0.8
 
 
 def test_levenshtein_calculation_no_match():

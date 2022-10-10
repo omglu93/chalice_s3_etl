@@ -42,5 +42,8 @@ def test_name_stand_factory(generate_output_folder_path,
     file_path = os.path.join(generate_output_folder_path, file_name)
 
     df = pd.read_parquet(file_path)
-    """TODO Return to this and add more assertions"""
+    os.remove(file_path)
+
     assert type(df) == pd.DataFrame
+    assert df["country_name_final"][0] == "People's Republic of China"
+    assert df["country_code_final"][0] == "CN"
