@@ -7,21 +7,25 @@ import numpy as np
 from functools import lru_cache
 
 from typing import Generator, Callable, Dict
-from error.exceptions import FileLoadingError
+from src.error.exceptions import FileLoadingError
 
 
 def read_data(path: str) -> Generator:
 
     """
+    ## **Function**
+    ----------
+
     The function automatically detects the file format by the given path
     parameter and returns a generator function for the loading of said files.
 
-    Parameters
+    ## **Parameters**
     ----------
 
-    :param path:
+    `path`:
         The path of the file or folder that needs to be standardized.
-    :return Generator:
+
+    `return Generator`:
         Returns a generator function that loads the data.
     """
 
@@ -59,17 +63,23 @@ def _read_data(path: str,
                format_function: Dict[str, Callable]
                ) -> Generator:
     """
+    ## **Function**
+    ----------
+
     Takes in a path and the function directory to create a generator for the
     file or folder.
 
 
-    Parameters
+    ## **Parameters**
     ----------
-    :param path:
+
+    `path`:
         The path to the file or folder that contains the data.
-    :param format_function:
+
+    `format_function`:
         The directory that contains the function for each file.
-    :return Generator:
+
+    `Generator`:
         Returns generator with all the data.
     """
 
@@ -87,16 +97,22 @@ def _read_data(path: str,
 def _find_file_function(path: str) -> Callable:
 
     """
+
+    ## **Function**
+    ----------
+
     The function finds the format of the given path and returns the appropriate
     function to read that file.
 
     Note - for now we only support csv files and Excel files as a catch all.
 
-    Parameters
+    ## **Parameters**
     ----------
-    :param path:
+
+    `path`:
         Path of the file that needs to be read.
-    :return Callable:
+
+    `return` Callable:
         Returns the function needed to read the file.
     """
 
@@ -127,19 +143,26 @@ def _find_file_function(path: str) -> Callable:
 def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
 
     """
+
+    ## **Function**
+    ----------
+
     Function calculates the Levenshtein distance ratio between two strings. The
     Levenshtein distance is the minimum number of single digit edits required
     to change a word into another. The ratio of the Levenshtein distance
     shows how similar two strings are. 1.0 meaning that the strings are a
     complete match, while 0.0 means that they don't match at all.
 
-    Parameters
+    ## **Parameters**
     ----------
-    :param base_str:
+
+    `base_str`:
         The string which ratio we are finding.
-    :param target_str:
+
+    `target_str`:
         The target string that gets matched against.
-    :return float:
+
+    `return float`:
         Returns a float representing ratio of the match.
     """
     # Create matrix
@@ -178,16 +201,25 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
 def export_to_parquet(path: str, dataframe: pd.DataFrame) -> None:
 
     """
+    ## **Function**
+    ----------
+
+
     Function writes out a pandas dataframe to parquet format based on the path
     given. If it is a folder, the function creates a new name for the file.
     Otherwise, the file path is used to generate the name.
 
-    :param path:
+    ## **Parameters**
+    ----------
+
+    `path`:
         Path that is used to create the parquet file. It can be either a folder
         or file path.
-    :param dataframe:
+
+    `dataframe`:
         Cleaned dataframe that will be writen in file.
-    :return None:
+
+    `return None`:
         Returns nothing
     """
 

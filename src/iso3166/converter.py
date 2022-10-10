@@ -1,11 +1,10 @@
 import os
-from typing import Tuple
 
 import pandas as pd
 import numpy as np
 
-from iso3166.utils import calculate_levenshtein_ratio
-from error.exceptions import DistanceCalculationError, AutoDetectionError
+from src.iso3166.utils import calculate_levenshtein_ratio
+from src.error.exceptions import DistanceCalculationError, AutoDetectionError
 
 # Loads the csv file containing possible naming options and
 # standard naming options for the iso3166 naming standard
@@ -21,33 +20,43 @@ def country_name_conversion(df: pd.DataFrame,
                             auto_find_retry: int = 3,
                             fast_mode: bool = True) -> pd.DataFrame:
     """
+    ## **Function**
+    ----------
+
     Function cleans and standardizes country names based on the
     iso3166 standard. The output contains the dataframe used as input in
     addition to the two generated columns with the iso3166 country name and code
 
-    Note - the iso3166 country code is based on the alpha-2 option.
+    ###`Note` - the iso3166 country code is based on the alpha-2 option.
 
-    Parameters
+    ## **Parameters**
     ----------
-    :param df:
+    `df:`
         A pandas dataframe that contains the data that needs to be cleaned.
-    :param fuzzy_threshold:
+
+    `fuzzy_threshold:`
         The minimum ratio between two strings that is needed to match them.
         For example, an integer of 80 means that the matching ratio needs to be
         above 0.8
-    :param sample_size:
+
+    `sample_size:`
         Integer that defines the sample size used for the auto-detection of
         the columns.
-    :param auto_find_retry:
+
+    `auto_find_retry:`
         The number of reties that the function will do for the auto-detection
         of columns
-    :param fast_mode:
+
+    `fast_mode:`
         Boolean value that determines the mode of the application.
-            - True - Fast mode only finds one column for the country name
-                    and leaves it at that.
-            - False - Loops over both the official and unofficial naming
-                    before returning results.
-    :return pd.Dataframe:
+            <ol>
+            <li>True: Fast mode only finds one column for the country name
+                    and leaves it at that.</li>
+            <li>False: Loops over both the official and unofficial naming
+                    before returning results.</li>
+            </ol>
+
+    `return pd.Dataframe:`
         Returns a cleaned dataframe with iso3166 columns for the country code
         and the country name
 
@@ -155,24 +164,33 @@ def _auto_find_column(df: pd.DataFrame,
                       input_format: str,
                       sample_size: int) -> str | None:
     """
+    ## **Function**
+    ----------
+
     Private function used to auto-detect the required columns in a dataframe.
     The function takes a sample of each column and tries to match it to the
     input_format.
 
-    Parameters
+
+    ## **Parameters**
     ----------
 
-    :param df:
+    `df`:
         A pandas dataframe that contains the data.
-    :param input_format:
+
+    `input_format`:
         The format the column finder is looking for. There are three choices
         to it:
-            - name - Normal name of the country
-            - official - ISO-3166 country name
-            - alpha-2 - ISO-3166 country code
-    :param sample_size:
+            <ol>
+            <li> name - Normal name of the country </li>
+            <li> official - ISO-3166 country name </li>
+            <li> alpha-2 - ISO-3166 country code </li>
+            </ol>
+
+    `sample_size`:
         Sample size that the function will match against.
-    :return str | None:
+
+    `return str | None`:
         The function returns a column name if there is a match. If not, it
         returns nothing and the error gets picked up by the try except block.
     """
@@ -199,21 +217,30 @@ def _format_country_name(val: str,
                          fuzzy_threshold: int,
                          wanted_output: str,
                          fast_mode: bool = True) -> str | None:
-    """
-    Function re-formats/standardizes the country name.
 
-    Parameters
+    """
+    ## **Function**
     ----------
 
-    :param val:
+
+    Function re-formats/standardizes the country name.
+
+    ## **Parameters**
+    ----------
+
+    `val`:
         The target value (country) that needs to be replaced/standardized.
-    :param target_column:
+
+    `target_column`:
         The column that contains the desired formatting.
-    :param fuzzy_threshold:
+
+    `fuzzy_threshold`:
         The fuzzy ratio that decides if a value is replaced or not.
-    :param wanted_output:
+
+    `wanted_output`:
         The desired output of the formatting.
-    :return str | None:
+
+    `return str | None`:
         Returns the formatted string or a None value if the string couldn't be
         matched against any anything.
     """
@@ -261,20 +288,26 @@ def _find_best_distance(country: str, target_column: pd.Series,
                         fuzzy_threshold: int,
                         ratio: bool = False) -> None | tuple[float, int] | int:
     """
+    ## **Function**
+    ----------
+
     Function finds the maximum levenshtein ratio and returns the index of that
     value.
 
-    Parameters
+    ## **Parameters**
     ----------
 
-    :param country:
+    `country`:
         The value whose levenshtein ratio is being calculated.
-    :param target_column:
+
+    `target_column`:
         The column which is being calculated against
-    :param fuzzy_threshold:
+
+    `fuzzy_threshold`:
         The minimum threshold for a value to be considered in the results
-    :return int | None:
-        returns either the index of the best value or None if a value for the
+
+    `return int | None`:
+        Returns either the index of the best value or None if a value for the
         given criteria could not be found.
     """
     results = []

@@ -6,10 +6,17 @@ import pandas as pd
 @pytest.fixture()
 def load_test_data(generate_file_path):
     """
+    ## **Function**
+    ----------
+
     Fixture function that reads and returns a pandas Dataframe for testing.
-    :param generate_file_path:
+
+    ## **Parameters**
+    ----------
+    `generate_file_path`:
         Fixture function that generates a dynamic file path.
-    :return pd.DataFrame:
+
+    `return pd.DataFrame`:
         Returns a pandas dataframe.
     """
 
@@ -19,8 +26,11 @@ def load_test_data(generate_file_path):
 @pytest.fixture()
 def generate_file_path():
     """
+    ## **Function**
+    ----------
     Fixture function that returns a dynamic string.
-    :return str:
+
+    `return str`:
         Returns a string of a file path.
     """
     return os.path.join(os.path.split(os.path.abspath(__file__))[0],
@@ -41,8 +51,12 @@ def generate_folder_path():
 @pytest.fixture()
 def generate_output_folder_path():
     """
+    ## **Function**
+    ----------
+
     Fixture function that returns a dynamic string of a folder
-    :return:
+
+    `return`:
         Returns a string of a folder path.
     """
     return os.path.join(os.path.split(os.path.abspath(__file__))[0],
@@ -52,8 +66,11 @@ def generate_output_folder_path():
 @pytest.fixture()
 def generate_example_file_path():
     """
+    ## **Function**
+    ----------
     Fixture function that returns a dynamic string of an example file.
-    :return str:
+
+    `return str`:
         Returns a string of a file path.
     """
     return os.path.join(os.path.split(os.path.abspath(__file__))[0],

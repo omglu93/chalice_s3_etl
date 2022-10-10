@@ -1,9 +1,8 @@
 import os
-
 import pandas as pd
 
-import factory
-from fixtures import generate_file_path, generate_folder_path, \
+from src import factory
+from src.test.fixtures import generate_file_path, generate_folder_path,\
     generate_output_folder_path, generate_example_file_path
 
 

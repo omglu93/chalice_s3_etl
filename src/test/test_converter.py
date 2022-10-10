@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from iso3166.converter import country_name_conversion
-from error.exceptions import AutoDetectionError
+from src.iso3166 import country_name_conversion
+from src.error.exceptions import AutoDetectionError
 
 
 def test_country_name_conversion_no_column_name():

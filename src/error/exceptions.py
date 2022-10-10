@@ -4,6 +4,9 @@ from .logger import logging
 class BaseCustomException(Exception):
 
     """
+    ## **Function**
+    ----------
+
     Base exception call used as a parent for more specific exceptions.
     """
 
@@ -20,6 +23,9 @@ class BaseCustomException(Exception):
 
 class FileLoadingError(BaseCustomException):
     """
+    ## **Function**
+    ----------
+
     Exception used for all kinds of errors relating to file loadings.
     """
     pass
@@ -27,6 +33,9 @@ class FileLoadingError(BaseCustomException):
 
 class DistanceCalculationError(BaseCustomException):
     """
+    ## **Function**
+    ----------
+
     Exception used for all kinds of errors relating to the calculation
     of the Levenshtein distance.
     """
@@ -35,8 +44,10 @@ class DistanceCalculationError(BaseCustomException):
 
 class AutoDetectionError(BaseCustomException):
     """
+    ## **Function**
+    ----------
+
     Exception used for all kinds of errors relating to the automatic detection
     of columns.
     """
     pass
-

@@ -3,9 +3,9 @@ import types
 import pytest
 import pandas as pd
 
-from iso3166.utils import read_data, calculate_levenshtein_ratio,\
+from src.iso3166 import read_data, calculate_levenshtein_ratio,\
     export_to_parquet
-from fixtures import generate_file_path, generate_folder_path,\
+from src.test.fixtures import generate_file_path, generate_folder_path,\
     generate_output_folder_path
 
 
