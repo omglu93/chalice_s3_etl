@@ -51,3 +51,16 @@ class AutoDetectionError(BaseCustomException):
     of columns.
     """
     pass
+
+
+class FileSavingError(BaseCustomException):
+    """
+    ## **Function**
+    ----------
+
+    Exception used for all kinds of errors relating to saving of files
+    """
+
+    """TODO Add actual functionality"""
+    pass
+

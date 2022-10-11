@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 
 from src.iso3166 import read_data, calculate_levenshtein_ratio,\
-    export_to_parquet
+    export_to_parquet, generate_report_template, update_reporting
 from src.test.fixtures import generate_file_path, generate_folder_path,\
     generate_output_folder_path
 
@@ -122,6 +122,53 @@ def test_export_to_parquet_bad_path():
 
     with pytest.raises(OSError) as err:
         export_to_parquet(some_bad_path, test_df)
+
+
+def test_generate_report_template():
+
+    x = generate_report_template()
+    report_template = pd.DataFrame({"file_name": [], "column_name": [],
+                                    "missing": [], "time": []})
+
+    assert isinstance(x, pd.DataFrame)
+    assert x == report_template
+
+
+def test_update_reporting():
+
+    report_template = generate_report_template()
+    test_df = pd.DataFrame(
+        {"messy_country": ["no single", "countries", "None"]})
+
+    some_file_name = "FileName"
+    detailed = True
+
+    report = update_reporting(
+            test_df,
+            report_template,
+            some_file_name,
+            detailed=detailed)
+
+    assert isinstance(report, pd.DataFrame)
+
+
+def test_update_reporting_no_none():
+
+    report_template = generate_report_template()
+    test_df = pd.DataFrame(
+        {"messy_country": ["no single", "countries", "Still"]})
+
+    some_file_name = "FileName"
+    detailed = True
+
+    report = update_reporting(
+            test_df,
+            report_template,
+            some_file_name,
+            detailed=detailed)
+
+    assert isinstance(report, pd.DataFrame)
+
 
 
 

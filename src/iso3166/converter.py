@@ -2,6 +2,7 @@ import os
 
 import pandas as pd
 import numpy as np
+from pandas import DataFrame
 
 from src.iso3166.utils import calculate_levenshtein_ratio
 from src.error.exceptions import DistanceCalculationError, AutoDetectionError
@@ -18,7 +19,8 @@ def country_name_conversion(df: pd.DataFrame,
                             fuzzy_threshold: int = 70,
                             sample_size: int = 10,
                             auto_find_retry: int = 3,
-                            fast_mode: bool = True) -> pd.DataFrame:
+                            fast_mode: bool = True
+                            ) -> DataFrame:
     """
     ## **Function**
     ----------
@@ -56,9 +58,9 @@ def country_name_conversion(df: pd.DataFrame,
                     before returning results.</li>
             </ol>
 
-    `return pd.Dataframe:`
+    `return tuple[pd.Dataframe, pd.Dataframe]:`
         Returns a cleaned dataframe with iso3166 columns for the country code
-        and the country name
+        and the country name. Plus a reporting dataframe.
 
     """
 
@@ -120,12 +122,12 @@ def country_name_conversion(df: pd.DataFrame,
         df["country_code_helper"] = df[secondary_column].apply(
             _format_country_name,
             args=(sec_data_col,
-                  fuzzy_threshold, "alpha-2"))
+                  fuzzy_threshold, "alpha-2", fast_mode))
 
         df["country_name_helper"] = df[secondary_column].apply(
             _format_country_name,
             args=(sec_data_col,
-                  fuzzy_threshold, "official"))
+                  fuzzy_threshold, "official", fast_mode))
 
     # Catch in case the auto-column finder returns nothing
     except KeyError as err:
@@ -151,6 +153,7 @@ def country_name_conversion(df: pd.DataFrame,
     df.drop(df.columns[[col for col in range(ini_num_col, final_num_col)]],
             axis=1,
             inplace=True)
+
     # Convert type to string to prevent some parquet errors
     conversion_list = df.columns[[col for col in range(ini_num_col,
                                                        len(df.columns))]]
@@ -217,7 +220,6 @@ def _format_country_name(val: str,
                          fuzzy_threshold: int,
                          wanted_output: str,
                          fast_mode: bool = True) -> str | None:
-
     """
     ## **Function**
     ----------
@@ -276,7 +278,8 @@ def _format_country_name(val: str,
 
     else:
         country_index = _find_best_distance(country,
-                                            target_column[0], fuzzy_threshold)
+                                            target_column[0],
+                                            fuzzy_threshold)
 
     if country_index is None:
         return None
@@ -327,7 +330,6 @@ def _find_best_distance(country: str, target_column: pd.Series,
                                              f"for:{val} on index {i}")
 
     if not results:
-        """TODO Reporting tool without raising anything"""
         return None
 
     if ratio:

@@ -7,11 +7,11 @@ import numpy as np
 from functools import lru_cache
 
 from typing import Generator, Callable, Dict
-from src.error.exceptions import FileLoadingError
+
+from src.error.exceptions import FileLoadingError, FileSavingError
 
 
 def read_data(path: str) -> Generator:
-
     """
     ## **Function**
     ----------
@@ -40,7 +40,6 @@ def read_data(path: str) -> Generator:
             # Validate files and pick functions
             all_read_functions = {}
             for i, file in enumerate(os.listdir(path)):
-
                 file_path = os.path.join(path, file)
                 # Finds the function that is used to read each file
                 read_function = _find_file_function(file_path)
@@ -95,7 +94,6 @@ def _read_data(path: str,
 
 
 def _find_file_function(path: str) -> Callable:
-
     """
 
     ## **Function**
@@ -141,7 +139,6 @@ def _find_file_function(path: str) -> Callable:
 
 @lru_cache(maxsize=None)
 def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
-
     """
 
     ## **Function**
@@ -194,12 +191,11 @@ def calculate_levenshtein_ratio(base_str: str, target_str: str) -> float:
                                         zero_matrix[row][col - 1] + 1,
                                         zero_matrix[row - 1][col - 1] + cost)
 
-    return ((len(base_str)+len(target_str))
-            - zero_matrix[row][col]) / (len(base_str)+len(target_str))
+    return ((len(base_str) + len(target_str))
+            - zero_matrix[row][col]) / (len(base_str) + len(target_str))
 
 
 def export_to_parquet(path: str, dataframe: pd.DataFrame) -> None:
-
     """
     ## **Function**
     ----------
@@ -242,6 +238,7 @@ def timeit(func):
     """
     Decorator for measuring function's running time.
     """
+
     def measure_time(*args, **kw):
         start_time = time.time()
         result = func(*args, **kw)
@@ -250,3 +247,123 @@ def timeit(func):
         return result
 
     return measure_time
+
+
+def generate_report_template() -> pd.DataFrame:
+    """
+    ## **Function**
+    ----------
+    Generates an empty dataframe that is used as a reporting template.
+
+    `return` pd.DataFrame:
+        Returns empty dataframe
+    """
+
+    report_template = pd.DataFrame({"file_name": [], "column_name": [],
+                                    "count_missing": [], "time": []})
+
+    return report_template
+
+
+def update_reporting(df: pd.DataFrame,
+                     report_template: pd.DataFrame,
+                     file_name: str,
+                     detailed: bool
+                     ):
+
+    """
+    ## **Function**
+    ----------
+
+    Populates the reporting template with the necessary data detailing the
+    missing values (not matched countries).
+
+    ## **Parameters**
+    ----------
+
+    `df`:
+        Dataframe on which the report is based on.
+
+    `report_template`:
+        Empty dataframe that is defined out of scope of this function which
+        contains the columns needed to the update.
+
+    `file_name`:
+        Name of the file from which the data is coming from
+
+    `detailed`:
+        Defines the level of detail that needs to be returned. True returns
+        the actual row where the data is missing, while False returns a count
+        summary.
+
+    `return` pd.DataFrame:
+        Returns DataFrame containing the report.
+    """
+    # Get last two columns
+    column_list = df.columns[-2:]
+
+    # Slice dataframe with last two columns
+    df = df[column_list]
+
+    # Count missing values and get all None rows
+    none_df = df[
+        (df[column_list[0]] == "None") | (df[column_list[1]] == "None")
+    ]
+
+    if detailed:
+        return none_df
+
+    summarization_df = none_df.count()
+
+    # Add new row to summarization
+    for name, data in summarization_df.items():
+
+        report_template.loc[-1] = { # -1 is bad
+            "file_name": file_name,
+            "column_name": name,
+            "count_missing": data,
+            "time": time.strftime("%Y-%m-%d-%H-%M-%S")}
+
+        report_template.index = report_template.index + 1
+        report_template = report_template.sort_index()
+
+    return report_template.dropna(axis=0)
+
+
+def finalize_report(df: pd.DataFrame):
+
+    """
+    ## **Function**
+    ----------
+
+    Generates name of the file and saves it as a csv in the reports folder.
+
+    ## **Parameters**
+    ----------
+
+    `df`:
+        Dataframe that contains the report data
+    `return`:
+        Returns nothing
+    """
+
+    if df.empty:
+        print("No issues found")
+
+    path = r"src/reports"
+
+    time_string = time.strftime("%Y%m%d-%H%M%S")
+    new_name = "error_report"
+    random_id = random.randint(1000, 9999)
+    full_path = os.path.join(path, f"{new_name}-{time_string}-{random_id}")
+
+    try:
+        df.to_csv(full_path)
+
+    except Exception as err:
+        raise FileSavingError(err=err, message="Error saving report")
+
+
+
+
+
