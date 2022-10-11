@@ -84,9 +84,3 @@ def name_standardization_factory(input_file_location: str,
 
     # Write report
     iso3166.finalize_report(report_template)
-
-
-
-if __name__ == "__main__":
-    name_standardization_factory(r"/Users/omargluhic/PycharmProjects/dataeng_task/src/test/test_data/population_by_country_2020.csv",
-                                 r"/Users/omargluhic/PycharmProjects/dataeng_task/src/test/test_data/output_test")
