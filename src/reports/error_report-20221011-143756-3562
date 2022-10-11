@@ -1,0 +1,3 @@
+,file_name,column_name,count_missing,time
+0,/Users/omargluhic/PycharmProjects/dataeng_task/src/test/test_data/population_by_country_2020.csv,country_code_final,4,2022-10-11-14-37-56
+1,/Users/omargluhic/PycharmProjects/dataeng_task/src/test/test_data/population_by_country_2020.csv,country_name_final,4,2022-10-11-14-37-56

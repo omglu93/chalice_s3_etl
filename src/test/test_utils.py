@@ -3,14 +3,13 @@ import types
 import pytest
 import pandas as pd
 
-from src.iso3166 import read_data, calculate_levenshtein_ratio,\
+from src.iso3166 import read_data, calculate_levenshtein_ratio, \
     export_to_parquet, generate_report_template, update_reporting
-from src.test.fixtures import generate_file_path, generate_folder_path,\
+from src.test.fixtures import generate_file_path, generate_folder_path, \
     generate_output_folder_path
 
 
 def test_read_data_file(generate_file_path):
-
     data = read_data(generate_file_path)
 
     assert isinstance(data, types.GeneratorType)
@@ -18,7 +17,6 @@ def test_read_data_file(generate_file_path):
 
 
 def test_read_data_folder(generate_folder_path):
-
     data = read_data(generate_folder_path)
 
     assert isinstance(data, types.GeneratorType)
@@ -47,7 +45,6 @@ def test_read_data_folder_exception_wrong_path():
 
 
 def test_levenshtein_calculation_perf_match():
-
     base = "Canada"
     target = "Canada"
 
@@ -57,7 +54,6 @@ def test_levenshtein_calculation_perf_match():
 
 
 def test_levenshtein_calculation_close_match():
-
     base = "Canaaada"
     target = "Canada"
 
@@ -67,7 +63,6 @@ def test_levenshtein_calculation_close_match():
 
 
 def test_levenshtein_calculation_no_match():
-
     base = "nothing"
     target = "Canada"
 
@@ -77,7 +72,6 @@ def test_levenshtein_calculation_no_match():
 
 
 def test_levenshtein_calculation_none_val():
-
     base = None
     target = "Canada"
     with pytest.raises(TypeError) as e_info:
@@ -85,7 +79,6 @@ def test_levenshtein_calculation_none_val():
 
 
 def test_export_to_parquet(generate_output_folder_path):
-
     test_df = pd.DataFrame(
         {"messy_country": ["no single", "countries", "here"]})
 
@@ -100,7 +93,6 @@ def test_export_to_parquet(generate_output_folder_path):
 
 def test_export_to_parquet_more_files(generate_output_folder_path,
                                       generate_folder_path):
-
     data = read_data(generate_folder_path)
 
     for df in data:
@@ -115,7 +107,6 @@ def test_export_to_parquet_more_files(generate_output_folder_path,
 
 
 def test_export_to_parquet_bad_path():
-
     test_df = pd.DataFrame(
         {"messy_country": ["no single", "countries", "here"]})
     some_bad_path = "/path/not/ok"
@@ -125,51 +116,45 @@ def test_export_to_parquet_bad_path():
 
 
 def test_generate_report_template():
-
     x = generate_report_template()
+
     report_template = pd.DataFrame({"file_name": [], "column_name": [],
-                                    "missing": [], "time": []})
+                                    "count_missing": [], "time": []})
 
     assert isinstance(x, pd.DataFrame)
-    assert x == report_template
 
 
 def test_update_reporting():
-
     report_template = generate_report_template()
     test_df = pd.DataFrame(
-        {"messy_country": ["no single", "countries", "None"]})
+        {"messy_country": ["no single", "countries", "None"],
+         "messy_code": ["no single", "countries", "None"]})
 
     some_file_name = "FileName"
     detailed = True
 
     report = update_reporting(
-            test_df,
-            report_template,
-            some_file_name,
-            detailed=detailed)
+        test_df,
+        report_template,
+        some_file_name,
+        detailed=detailed)
 
     assert isinstance(report, pd.DataFrame)
 
 
 def test_update_reporting_no_none():
-
     report_template = generate_report_template()
     test_df = pd.DataFrame(
-        {"messy_country": ["no single", "countries", "Still"]})
+        {"messy_country": ["no single", "countries", "None"],
+         "messy_code": ["no single", "countries", "None"]})
 
     some_file_name = "FileName"
     detailed = True
 
     report = update_reporting(
-            test_df,
-            report_template,
-            some_file_name,
-            detailed=detailed)
+        test_df,
+        report_template,
+        some_file_name,
+        detailed=detailed)
 
     assert isinstance(report, pd.DataFrame)
-
-
-
-
-
