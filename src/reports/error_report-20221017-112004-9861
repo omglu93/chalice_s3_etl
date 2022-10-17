@@ -1,5 +1,0 @@
-,file_name,column_name,count_missing,time
-0,test_data1.csv,country_code_final,0,2022-10-17-11-20-04
-1,test_data1.csv,country_name_final,0,2022-10-17-11-20-04
-2,test_data2.csv,country_code_final,0,2022-10-17-11-20-04
-3,test_data2.csv,country_name_final,0,2022-10-17-11-20-04
