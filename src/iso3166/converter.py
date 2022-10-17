@@ -165,7 +165,7 @@ def country_name_conversion(df: pd.DataFrame,
 
 def _auto_find_column(df: pd.DataFrame,
                       input_format: str,
-                      sample_size: int) -> str | None:
+                      sample_size: int):
     """
     ## **Function**
     ----------
@@ -219,7 +219,7 @@ def _format_country_name(val: str,
                          target_column: tuple[pd.Series],
                          fuzzy_threshold: int,
                          wanted_output: str,
-                         fast_mode: bool = True) -> str | None:
+                         fast_mode: bool = True):
     """
     ## **Function**
     ----------
@@ -289,7 +289,7 @@ def _format_country_name(val: str,
 
 def _find_best_distance(country: str, target_column: pd.Series,
                         fuzzy_threshold: int,
-                        ratio: bool = False) -> None | tuple[float, int] | int:
+                        ratio: bool = False):
     """
     ## **Function**
     ----------
