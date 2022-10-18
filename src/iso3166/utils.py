@@ -9,6 +9,7 @@ from functools import lru_cache
 from typing import Generator, Callable, Dict
 
 from src.error.exceptions import FileLoadingError, FileSavingError
+from src.iso3166.dispatcher import DynamicFileMachine
 
 
 def read_data(path: str) -> Generator:
@@ -40,16 +41,23 @@ def read_data(path: str) -> Generator:
             # Validate files and pick functions
             all_read_functions = {}
             for i, file in enumerate(os.listdir(path)):
+
                 file_path = os.path.join(path, file)
+                _, file_type = os.path.splitext(file_path)
+
+                if not file_type:
+                    raise FileLoadingError(err="No file type found")
+
                 # Finds the function that is used to read each file
-                read_function = _find_file_function(file_path)
+                read_function = DynamicFileMachine(file_type).dispatcher()
 
                 all_read_functions[file_path] = read_function
 
             return _read_data(path, all_read_functions)
 
         # If a file path is given, only finds the function for that one file
-        read_function = _find_file_function(path)
+        _, file_type = os.path.splitext(path)
+        read_function = DynamicFileMachine(file_type).dispatcher()
 
         return _read_data(path, {path: read_function})
 
@@ -91,50 +99,6 @@ def _read_data(path: str,
     else:
         # Quick fix
         return (format_function[path](path) for x in range(0, 1))
-
-
-def _find_file_function(path: str) -> Callable:
-    """
-
-    ## **Function**
-    ----------
-
-    The function finds the format of the given path and returns the appropriate
-    function to read that file.
-
-    Note - for now we only support csv files and Excel files as a catch all.
-
-    ## **Parameters**
-    ----------
-
-    `path`:
-        Path of the file that needs to be read.
-
-    `return` Callable:
-        Returns the function needed to read the file.
-    """
-
-    """TODO define better catch them all function, add more file type loaders"""
-
-    file_functions = {".csv": pd.read_csv}
-
-    # Find file type
-    _, file_type = os.path.splitext(path)
-
-    try:
-        if file_type is None:
-            raise FileLoadingError("File format not found:"
-                                   f" {file_type} in {path}")
-
-        elif file_type in file_functions:
-            return file_functions[file_type]
-
-        # Excel as a catch them all
-        return pd.read_excel
-
-    except Exception as error:
-        FileLoadingError(str(error), message="Error loading files")
-        raise
 
 
 @lru_cache(maxsize=None)
@@ -318,7 +282,7 @@ def update_reporting(df: pd.DataFrame,
     # Add new row to summarization
     for name, data in summarization_df.items():
 
-        report_template.loc[-1] = { # -1 is bad
+        report_template.loc[-1] = {
             "file_name": file_name,
             "column_name": name,
             "count_missing": data,
@@ -362,8 +326,4 @@ def finalize_report(df: pd.DataFrame):
 
     except Exception as err:
         raise FileSavingError(err=err, message="Error saving report")
-
-
-
-
 
