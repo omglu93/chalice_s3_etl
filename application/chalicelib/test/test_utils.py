@@ -10,7 +10,7 @@ from application.chalicelib.iso3166.utils import read_data, \
     update_reporting, read_s3_data, load_to_s3
 
 from application.chalicelib.test.fixtures import generate_file_path, \
-    generate_folder_path
+    generate_folder_path, generate_output_folder_path
 
 
 def test_read_s3_data(generate_file_path):

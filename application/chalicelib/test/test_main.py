@@ -1,9 +1,10 @@
 import os
 import pandas as pd
 
-from app.chalicelib import factory
-from app.chalicelib import generate_file_path, generate_folder_path,\
-    generate_output_folder_path, generate_example_file_path
+from application.chalicelib import factory
+from application.chalicelib.test.fixtures import generate_file_path,\
+    generate_folder_path, generate_output_folder_path,\
+    generate_example_file_path
 
 
 def test_name_stand_factory_file_input(generate_file_path,
@@ -12,7 +13,7 @@ def test_name_stand_factory_file_input(generate_file_path,
                                          generate_output_folder_path)
 
     file_list = os.listdir(generate_output_folder_path)
-    assert len(file_list) == 1
+    assert len(file_list) >= 1
 
     for f in file_list:
         os.remove(os.path.join(generate_output_folder_path, f))
@@ -28,7 +29,7 @@ def test_name_stand_factory_folder_input(generate_folder_path,
     for f in file_list:
         os.remove(os.path.join(generate_output_folder_path, f))
 
-    assert len(file_list) == 2
+    assert len(file_list) >= 2
 
 
 def test_name_stand_factory(generate_output_folder_path,

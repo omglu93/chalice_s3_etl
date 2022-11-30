@@ -2,8 +2,8 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from app.chalicelib import country_name_conversion
-from app.chalicelib.error.exceptions import AutoDetectionError
+from application.chalicelib.iso3166.converter import country_name_conversion
+from application.chalicelib.error.exceptions import AutoDetectionError
 
 
 def test_country_name_conversion_no_column_name():

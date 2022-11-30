@@ -1,3 +1,3 @@
 #! /usr/bin/env bash
 
-python -m pytest ./src/test
+python -m pytest ./application/chalicelib/test

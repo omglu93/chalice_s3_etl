@@ -378,7 +378,7 @@ def finalize_report(df: pd.DataFrame):
     if df.empty:
         print("No issues found")
 
-    path = r"chalicelib/reports"
+    path = r"application/chalicelib/reports"
 
     time_string = time.strftime("%Y%m%d-%H%M%S")
     new_name = "error_report"
