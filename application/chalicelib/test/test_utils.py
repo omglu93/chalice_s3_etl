@@ -1,10 +1,35 @@
+import io
 import os
 import types
 import pytest
 import pandas as pd
+import boto3
 
-from app.chalicelib import read_data, calculate_levenshtein_ratio, \
-    export_to_parquet, generate_report_template, update_reporting
+from application.chalicelib.iso3166.utils import read_data, \
+    calculate_levenshtein_ratio, export_to_parquet, generate_report_template, \
+    update_reporting, read_s3_data, load_to_s3
+
+from application.chalicelib.test.fixtures import generate_file_path, \
+    generate_folder_path
+
+
+def test_read_s3_data(generate_file_path):
+    with open(generate_file_path, "rb") as fh:
+        data = io.BytesIO(fh.read())
+        filename = "test_file.csv"
+
+        df = read_s3_data(filename, data)
+
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_read_s3_data_wrong_extension(generate_file_path):
+    with pytest.raises(Exception) as e_info:
+        with open(generate_file_path, "rb") as fh:
+            data = io.BytesIO(fh.read())
+            filename = "test_file.kvr"
+
+            df = read_s3_data(filename, data)
 
 
 def test_read_data_file(generate_file_path):

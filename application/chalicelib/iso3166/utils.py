@@ -6,13 +6,32 @@ import io
 import pandas as pd
 import numpy as np
 from functools import lru_cache
-from typing import Generator, Callable, Dict, Literal, Any
+from typing import Generator, Callable, Dict, Any
 
 from ..error.exceptions import FileLoadingError, FileSavingError
 from ..iso3166.dispatcher import DynamicFileMachine
 
 
 def read_s3_data(file_name: str, data: io.BytesIO) -> pd.DataFrame:
+    """
+        ## **Function**
+        ----------
+
+        The function reads files byte data of a target s3 bucket and
+        converts it into a dataframe.
+
+        ## **Parameters**
+        ----------
+
+        `file_name`:
+            Name of the file to determine the file type.
+
+        `data`:
+            Byte data that gets loaded into a dataframe object.
+
+        `return pd.DataFrame`:
+            Returns a pd.DataFrame object that contains data from the s3 file.
+        """
     try:
         _, file_type = os.path.splitext(file_name)
         read_function = DynamicFileMachine(file_type).dispatcher()
@@ -20,17 +39,39 @@ def read_s3_data(file_name: str, data: io.BytesIO) -> pd.DataFrame:
         return read_function(data)
 
     except Exception as err:
-        # Ubaciti logging
         raise FileLoadingError(err,
                                message="Error loading following "
                                        "file from s3 bucket")
 
 
-def load_to_s3(#export_type: Literal["parquet", "csv"],
-               s3_client: Any,
-               destination: str,
-               name: str,
-               dataframe: pd.DataFrame) -> None:
+def load_to_s3(s3_client: Any, destination: str,
+               name: str, dataframe: pd.DataFrame) -> None:
+
+    """
+    ## **Function**
+    ----------
+
+    The function loads a dataframe into a file and stores it in a s3 bucket.
+
+    ## **Parameters**
+    ----------
+
+    `s3_client`:
+        Boto3 s3 client that is passed in the object handle function.
+
+    `destination`:
+        Name of the destination bucket.
+
+    `name`:
+        Desired file name after being uploaded into the s3 bucket.
+
+    `dataframe`:
+        Dataframe with the prepared data that gets loaded into the file.
+
+    `return None`:
+        Returns nothing.
+    """
+
     out_buffer = io.BytesIO()
     dataframe.to_parquet(out_buffer, index=False)
     s3_client.put_object(Bucket=destination,

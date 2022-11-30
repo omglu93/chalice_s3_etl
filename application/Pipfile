@@ -11,6 +11,7 @@ pandas = "*"
 
 [dev-packages]
 chalice-local = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.9"

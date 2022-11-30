@@ -20,7 +20,24 @@ s3_client = boto3.client(
 
 @app.on_s3_event(bucket=settings.INPUT_BUCKET, events=["s3:ObjectCreated:*"])
 def handle_object_creation(event):
-    # try:
+    """
+    ## **Function**
+    ----------
+
+    The function tracks uploads on a s3 bucket, transforms the data and loads
+    it into an output bucket.
+
+    ## **Parameters**
+    ----------
+
+    `event`:
+        Event is a parameter defined by the chalice wrapper, it contains data
+        from the event that triggers the function.
+
+    `return None`:
+        Returns nothing.
+    """
+
     response = s3_client.get_object(Bucket=settings.INPUT_BUCKET,
                                     Key=event.key)
 
