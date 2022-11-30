@@ -8,7 +8,6 @@ chalice = "*"
 python-dotenv = "*"
 boto3 = "*"
 pandas = "*"
-pyarrow = "*"
 
 [dev-packages]
 chalice-local = "*"
