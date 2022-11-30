@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+chalice = "*"
+python-dotenv = "*"
+boto3 = "*"
+pandas = "*"
+pyarrow = "*"
+
+[dev-packages]
+chalice-local = "*"
+
+[requires]
+python_version = "3.9"

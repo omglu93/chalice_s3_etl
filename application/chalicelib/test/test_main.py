@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 
-from src import factory
-from src.test.fixtures import generate_file_path, generate_folder_path,\
+from app.chalicelib import factory
+from app.chalicelib import generate_file_path, generate_folder_path,\
     generate_output_folder_path, generate_example_file_path
 
 

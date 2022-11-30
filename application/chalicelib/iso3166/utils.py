@@ -1,15 +1,41 @@
 import os
 import time
 import random
+import io
 
 import pandas as pd
 import numpy as np
 from functools import lru_cache
+from typing import Generator, Callable, Dict, Literal, Any
 
-from typing import Generator, Callable, Dict
+from ..error.exceptions import FileLoadingError, FileSavingError
+from ..iso3166.dispatcher import DynamicFileMachine
 
-from src.error.exceptions import FileLoadingError, FileSavingError
-from src.iso3166.dispatcher import DynamicFileMachine
+
+def read_s3_data(file_name: str, data: io.BytesIO) -> pd.DataFrame:
+    try:
+        _, file_type = os.path.splitext(file_name)
+        read_function = DynamicFileMachine(file_type).dispatcher()
+
+        return read_function(data)
+
+    except Exception as err:
+        # Ubaciti logging
+        raise FileLoadingError(err,
+                               message="Error loading following "
+                                       "file from s3 bucket")
+
+
+def load_to_s3(#export_type: Literal["parquet", "csv"],
+               s3_client: Any,
+               destination: str,
+               name: str,
+               dataframe: pd.DataFrame) -> None:
+    out_buffer = io.BytesIO()
+    dataframe.to_parquet(out_buffer, index=False)
+    s3_client.put_object(Bucket=destination,
+                         Key=name,
+                         Body=out_buffer.getvalue())
 
 
 def read_data(path: str) -> Generator:
@@ -183,13 +209,13 @@ def export_to_parquet(path: str, dataframe: pd.DataFrame) -> None:
         Returns nothing
     """
 
+    # Create current timestamp and name
+    time_string = time.strftime("%Y%m%d-%H%M%S")
+    new_name = "file_export"
+    random_id = random.randint(1000, 9999)
+
     # Check if folder
     if os.path.isdir(path):
-
-        # Create current timestamp and name
-        time_string = time.strftime("%Y%m%d-%H%M%S")
-        new_name = "file_export"
-        random_id = random.randint(1000, 9999)
         full_path = os.path.join(path, f"{new_name}-{time_string}-{random_id}")
 
         dataframe.to_parquet(full_path)
@@ -234,7 +260,6 @@ def update_reporting(df: pd.DataFrame,
                      file_name: str,
                      detailed: bool
                      ):
-
     """
     ## **Function**
     ----------
@@ -272,7 +297,7 @@ def update_reporting(df: pd.DataFrame,
     # Count missing values and get all None rows
     none_df = df[
         (df[column_list[0]] == "None") | (df[column_list[1]] == "None")
-    ]
+        ]
 
     if detailed:
         return none_df
@@ -281,7 +306,6 @@ def update_reporting(df: pd.DataFrame,
 
     # Add new row to summarization
     for name, data in summarization_df.items():
-
         report_template.loc[-1] = {
             "file_name": file_name,
             "column_name": name,
@@ -295,7 +319,6 @@ def update_reporting(df: pd.DataFrame,
 
 
 def finalize_report(df: pd.DataFrame):
-
     """
     ## **Function**
     ----------
@@ -314,7 +337,7 @@ def finalize_report(df: pd.DataFrame):
     if df.empty:
         print("No issues found")
 
-    path = r"src/reports"
+    path = r"chalicelib/reports"
 
     time_string = time.strftime("%Y%m%d-%H%M%S")
     new_name = "error_report"
@@ -326,4 +349,3 @@ def finalize_report(df: pd.DataFrame):
 
     except Exception as err:
         raise FileSavingError(err=err, message="Error saving report")
-

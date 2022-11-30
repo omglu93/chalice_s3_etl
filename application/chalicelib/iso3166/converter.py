@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 
-from src.iso3166.utils import calculate_levenshtein_ratio
-from src.error.exceptions import DistanceCalculationError, AutoDetectionError
+from .utils import calculate_levenshtein_ratio
+from ..error.exceptions import DistanceCalculationError, AutoDetectionError
 
 # Loads the csv file containing possible naming options and
 # standard naming options for the iso3166 naming standard

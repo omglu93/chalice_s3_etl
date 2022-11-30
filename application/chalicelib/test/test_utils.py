@@ -3,10 +3,8 @@ import types
 import pytest
 import pandas as pd
 
-from src.iso3166 import read_data, calculate_levenshtein_ratio, \
+from app.chalicelib import read_data, calculate_levenshtein_ratio, \
     export_to_parquet, generate_report_template, update_reporting
-from src.test.fixtures import generate_file_path, generate_folder_path, \
-    generate_output_folder_path
 
 
 def test_read_data_file(generate_file_path):

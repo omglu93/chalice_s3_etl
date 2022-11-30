@@ -1,7 +1,10 @@
+import io
 import os
 
-from src import iso3166
-from typing import Optional
+import pandas as pd
+
+from . import iso3166
+from typing import Optional, Tuple
 
 
 def name_standardization_factory(input_file_location: str,
@@ -50,11 +53,11 @@ def name_standardization_factory(input_file_location: str,
     """
 
     # Read the path data
-    data_generator = iso3166.read_data(path=input_file_location)
+    data_generator = iso3166.utils.read_data(path=input_file_location)
 
     # Create empty report template dataframe
     # Summarization or detailed
-    report_template = iso3166.generate_report_template()
+    report_template = iso3166.utils.generate_report_template()
 
     # Check if the location is a file or folder
     try:
@@ -64,23 +67,60 @@ def name_standardization_factory(input_file_location: str,
         file_list = input_file_location,
 
     for dataset, filename in zip(data_generator, file_list):
-
         # Process the data
-        dataframe = iso3166.country_name_conversion(
+        dataframe = iso3166.converter.country_name_conversion(
             df=dataset,
             fuzzy_threshold=fuzzy_threshold,
             sample_size=sample_size,
             auto_find_retry=auto_find_retry,
             fast_mode=fast_mode)
 
-        report_template = iso3166.update_reporting(
+        report_template = iso3166.utils.update_reporting(
             dataframe,
             report_template,
             filename,
             detailed_report)
 
         # Write the data
-        iso3166.export_to_parquet(output_location, dataframe)
+        iso3166.utils.export_to_parquet(output_location, dataframe)
 
     # Write report
-    iso3166.finalize_report(report_template)
+    iso3166.utils.finalize_report(report_template)
+
+
+def lambda_name_standardization_factory(data: io.BytesIO,
+                                        file_name: str,
+                                        fuzzy_threshold: Optional[int] = 70,
+                                        sample_size: Optional[int] = 10,
+                                        auto_find_retry: Optional[int] = 3,
+                                        fast_mode: Optional[bool] = False,
+                                        detailed_report: Optional[bool] = False
+                                        ) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    # Read data and create generator
+    data_generator = iso3166.utils.read_s3_data(file_name=file_name,
+                                                data=data)
+
+    # Create empty report template dataframe
+    # Summarization or detailed
+    report_template = iso3166.utils.generate_report_template()
+
+    dataframe = iso3166.converter.country_name_conversion(
+            df=data_generator,
+            fuzzy_threshold=fuzzy_threshold,
+            sample_size=sample_size,
+            auto_find_retry=auto_find_retry,
+            fast_mode=fast_mode)
+
+    report_template = iso3166.utils.update_reporting(
+            dataframe,
+            report_template,
+            file_name,
+            detailed_report)
+
+    return dataframe, report_template
+
+    # # Write the data
+    # iso3166.export_to_parquet(output_location, dataframe)
+    #
+    # # Write report
+    # iso3166.finalize_report(report_template)
