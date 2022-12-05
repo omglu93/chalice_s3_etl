@@ -3,9 +3,9 @@ import time
 import boto3
 from chalice import Chalice
 
-from chalicelib.factory import lambda_name_standardization_factory
-from chalicelib.iso3166.utils import load_to_s3
-from chalicelib.core.config import settings
+from .chalicelib.factory import lambda_name_standardization_factory
+from .chalicelib.iso3166.utils import load_to_s3
+from .chalicelib.core.config import settings
 
 app = Chalice(app_name=settings.PROJECT_NAME)
 
